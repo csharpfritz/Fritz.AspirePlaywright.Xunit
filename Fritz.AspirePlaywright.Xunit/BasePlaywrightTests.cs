@@ -3,7 +3,6 @@
 /// <summary>
 /// Base class for Playwright tests, providing common functionality and setup for Playwright testing with ASP.NET Core.
 /// </summary>
-/// <typeparam name="TFixture"></typeparam>
 /// <param name="aspireManager"></param>
 public abstract class BasePlaywrightTests : IClassFixture<AspireManager>, IAsyncDisposable
 {
@@ -19,6 +18,10 @@ public abstract class BasePlaywrightTests : IClassFixture<AspireManager>, IAsync
 
 	private IBrowserContext? _context;
 
+/// <summary>
+/// Configure the Aspire application for testing with Playwright.  Run this at the beginning of your tests.
+/// </summary>
+/// /// <typeparam name="TEntryPoint">The AppHost class for the Aspire application.  Should have a syntax like 'Projects.AppHost'</typeparam>
 	public Task<DistributedApplication> ConfigureAsync<TEntryPoint>(
 			string[]? args = null,
 			Action<IDistributedApplicationTestingBuilder>? configureBuilder = null) where TEntryPoint : class =>
