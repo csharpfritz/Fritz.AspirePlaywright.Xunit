@@ -13,34 +13,41 @@ public class AspireManager : IAsyncLifetime
 	/// <summary>
 	/// Configure the Aspire application for testing with Playwright.
 	/// </summary>
-	public async Task<DistributedApplication> ConfigureAsync<TEntryPoint>(
+	internal async Task<DistributedApplication> ConfigureAsync<TEntryPoint>(
 			string[]? args = null,
 			Action<IDistributedApplicationTestingBuilder>? configureBuilder = null) where TEntryPoint : class
 	{
 
-		if (App is not null) return App;
 
-		var builder = await DistributedApplicationTestingBuilder.CreateAsync<TEntryPoint>(
-				args: args ?? [],
-				configureBuilder: static (options, _) =>
-				{
-					options.DisableDashboard = false;
-				});
+		if (App is not null) {
 
-		builder.Configuration["ASPIRE_ALLOW_UNSECURED_TRANSPORT"] = "true";
+			return App;
+		}
 
-		configureBuilder?.Invoke(builder);
+			var builder = await DistributedApplicationTestingBuilder.CreateAsync<TEntryPoint>(
+					args: args ?? [],
+					configureBuilder: static (options, _) =>
+					{
+						options.DisableDashboard = false;
+					});
 
-		App = await builder.BuildAsync();
+			builder.Configuration["ASPIRE_ALLOW_UNSECURED_TRANSPORT"] = "true";
 
-		await App.StartAsync();
+			configureBuilder?.Invoke(builder);
 
-		return App;
-	}
+			App = await builder.BuildAsync();
+
+			await App.StartAsync();
+
+			return App;
+
+		}
+
+
 
 	/// <summary>
-	/// Initialize the Aspire application and Playwright for testing.
-	/// This method should be called before running any tests to ensure the application is ready.
+	/// This is called by the test framework to initialize the Aspire application and Playwright.
+	/// Tests should not call this directly.
 	/// </summary>
 	/// <returns></returns>
 	public async Task InitializeAsync()
@@ -49,11 +56,16 @@ public class AspireManager : IAsyncLifetime
 		await PlaywrightManager.InitializeAsync();
 	}
 
+	/// <summary>
+	/// This is called by the test framework to dispose of the Aspire application and Playwright.
+	/// Tests should not call this directly.
+	/// </summary>
+	/// <returns></returns>
 	public async Task DisposeAsync()
 	{
 		await PlaywrightManager.DisposeAsync();
 
 		await (App?.DisposeAsync() ?? ValueTask.CompletedTask);
 	}
-	
+
 }

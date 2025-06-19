@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
     <Using Include="Aspire.Hosting" />
     <Using Include="Aspire.Hosting.Testing" />
     <Using Include="Xunit" />
-		<Using Include="Microsoft.Playwright" />
+    <Using Include="Microsoft.Playwright" />
   </ItemGroup>
 
 </Project>

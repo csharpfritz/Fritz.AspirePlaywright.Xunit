@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 
+
 namespace Fritz.AspirePlaywright.Xunit;
 
 /// <summary>
@@ -25,6 +26,7 @@ internal class PlaywrightManager : IAsyncLifetime
 			Headless = IsHeadless
 		};
 
+		Console.WriteLine($"Launching browser in {(IsHeadless ? "headless" : "headed")} mode...");
 		Browser = await _playwright.Chromium.LaunchAsync(options).ConfigureAwait(false);
 	}
 

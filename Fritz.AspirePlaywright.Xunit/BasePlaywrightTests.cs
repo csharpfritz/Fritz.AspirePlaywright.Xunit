@@ -6,16 +6,23 @@
 /// <param name="aspireManager"></param>
 public abstract class BasePlaywrightTests : IClassFixture<AspireManager>, IAsyncDisposable
 {
+	private AspireManager AspireManager { get; }
+	private PlaywrightManager PlaywrightManager => AspireManager.PlaywrightManager;
 
-	protected BasePlaywrightTests(AspireManager aspireManager) =>
+
+	protected BasePlaywrightTests(AspireManager aspireManager) 
+	{
+		Console.WriteLine("BasePlaywrightTests constructor called");
 		AspireManager = aspireManager ?? throw new ArgumentNullException(nameof(aspireManager));
+	}
 
-	AspireManager AspireManager { get; }
-	PlaywrightManager PlaywrightManager => AspireManager.PlaywrightManager;
 	public string? DashboardUrl { get; private set; }
 	public string DashboardLoginToken { get; private set; } = "";
-	private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
+	/// <summary>
+	/// The default timeout for Playwright operations, such as waiting for a page to load or an element to appear.
+	/// </summary>
+	protected TimeSpan DefaultTimeout { get; set; } = TimeSpan.FromSeconds(30);
 	private IBrowserContext? _context;
 
 /// <summary>
@@ -41,26 +48,34 @@ public abstract class BasePlaywrightTests : IClassFixture<AspireManager>, IAsync
 		ViewportSize? size = null)
 	{
 
+		if (AspireManager.App is null)
+		{
+			throw new InvalidOperationException("Aspire application is not configured. Call ConfigureAsync<TEntryPoint>() before running tests.");
+		}
+
 		Uri urlSought;
 		var cancellationToken = new CancellationTokenSource(DefaultTimeout).Token;
 
 		// Empty string means the dashboard URL
 		if (!string.IsNullOrEmpty(serviceName))
 		{
-			if (AspireManager.App.GetEndpoint(serviceName) is null)
+			if (AspireManager.App?.GetEndpoint(serviceName) is null)
 			{
 				throw new InvalidOperationException($"Service '{serviceName}' not found in the application endpoints");
 			}
 
-			//			urlSought = new Uri(AppHostTestFixture.App.GetEndpoint(serviceName), relativeUrl);
 			urlSought = AspireManager.App.GetEndpoint(serviceName);
+
 		}
 		else
 		{
-			urlSought = new Uri(DashboardUrl);
+			urlSought = new Uri(DashboardUrl!);
 		}
 
-		await AspireManager.App.ResourceNotifications.WaitForResourceHealthyAsync(serviceName, cancellationToken).WaitAsync(DefaultTimeout, cancellationToken);
+		// Waits for the specified service to become healthy.
+		await AspireManager.App.ResourceNotifications
+			.WaitForResourceHealthyAsync(serviceName, cancellationToken)
+			.WaitAsync(DefaultTimeout, cancellationToken);
 
 		var page = await CreateNewPageAsync(urlSought, size);
 
@@ -72,17 +87,23 @@ public abstract class BasePlaywrightTests : IClassFixture<AspireManager>, IAsync
 		{
 			await page.CloseAsync();
 		}
+
 	}
 
 	private async Task<IPage> CreateNewPageAsync(Uri uri, ViewportSize? size = null)
 	{
-		_context = await PlaywrightManager.Browser.NewContextAsync(new BrowserNewContextOptions
-		{
-			IgnoreHTTPSErrors = true,
-			ColorScheme = ColorScheme.Dark,
-			ViewportSize = size,
-			BaseURL = uri.ToString()
-		});
+
+		Console.WriteLine($"Creating new page for {uri} with size {size}");
+
+		_context = await PlaywrightManager.Browser
+			.NewContextAsync(new BrowserNewContextOptions
+			{
+				
+				IgnoreHTTPSErrors = true,
+				ColorScheme = ColorScheme.Dark,
+				ViewportSize = size,
+				BaseURL = uri.ToString()
+			});
 
 		return await _context.NewPageAsync();
 
