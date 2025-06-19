@@ -12,4 +12,11 @@
     <PackageReference Include="xunit" Version="2.9.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Aspire.Hosting" />
+    <Using Include="Aspire.Hosting.Testing" />
+    <Using Include="Xunit" />
+		<Using Include="Microsoft.Playwright" />
+  </ItemGroup>
+
 </Project>
