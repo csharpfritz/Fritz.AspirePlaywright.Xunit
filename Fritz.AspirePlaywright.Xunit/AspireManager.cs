@@ -8,7 +8,7 @@ public class AspireManager : IAsyncLifetime
 
 	internal PlaywrightManager PlaywrightManager { get; } = new();
 
-	internal DistributedApplication? App { get; private set; }
+	internal static DistributedApplication? App { get; private set; }
 
 	/// <summary>
 	/// Configure the Aspire application for testing with Playwright.

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace Fritz.AspirePlaywright.Xunit;
 
